@@ -1,106 +1,131 @@
-﻿<#
-	.NOTES
-	===========================================================================
-	 Created on:   	27/01/2017
-	 Created by:   	Jim Moyle
-	 GitHub link: 	https://github.com/JimMoyle/GUIDemo
-	 Twitter: 		@JimMoyle
-	===========================================================================
-	.DESCRIPTION
-		A description of the file.
-#>
+﻿[cmdletbinding()]
+Param()
+Add-Type -Assembly PresentationFramework            
+Add-Type -Assembly PresentationCore
 
-function Get-XamlObject
-{
-	[CmdletBinding()]
-	param (
-		[Parameter(Position = 0,
-				   Mandatory = $true,
-				   ValuefromPipelineByPropertyName = $true,
-				   ValuefromPipeline = $true)]
-		[Alias("FullName")]
-		[System.String[]]$Path
-	)
-
-	BEGIN
-	{
-		Set-StrictMode -Version Latest
-
-		$wpfObjects = @{ }
-		Add-Type -AssemblyName presentationframework, presentationcore
-
-	} #BEGIN
-
-	PROCESS
-	{
-		try
-		{
-			foreach ($xamlFile in $Path)
-			{
-				#Change content of Xaml file to be a set of powershell GUI objects
-				$inputXML = Get-Content -Path $xamlFile -ErrorAction Stop
-				$inputXMLClean = $inputXML -replace 'mc:Ignorable="d"', '' -replace "x:N", 'N' -replace 'x:Class=".*?"', '' -replace 'd:DesignHeight="\d*?"', '' -replace 'd:DesignWidth="\d*?"', ''
-				[xml]$xaml = $inputXMLClean
-				$reader = New-Object System.Xml.XmlNodeReader $xaml -ErrorAction Stop
-				$tempform = [Windows.Markup.XamlReader]::Load($reader)
-
-				#Grab named objects from tree and put in a flat structure
-				$namedNodes = $xaml.SelectNodes("//*[@*[contains(translate(name(.),'n','N'),'Name')]]")
-				$namedNodes | ForEach-Object {
-
-					$wpfObjects.Add($_.Name, $tempform.FindName($_.Name))
-
-				} #foreach-object
-			} #foreach xamlpath
-		} #try
-		catch
-		{
-			throw $error[0]
-		} #catch
-	} #PROCESS
-
-	END
-	{
-		Write-Output $wpfObjects
-	} #END
+$CheckRunspace = Get-Runspace -Name WakieWakie
+If (($CheckRunspace | Measure).Count -ge 1) {
+    $CheckRunspace | % {
+        $_.Close()
+        sleep -Milliseconds 500
+        $_.Dispose()
+    }
 }
 
-#region Blah
-$path = 'C:\Users\japarker\source\repos\PowerShellApps\WakieWakie\WakieWakie'
+$script:syncHash = [hashtable]::Synchronized(@{})
+$syncHash.Host = $Host
+$syncHash.XAMLPath = Join-Path $PSScriptRoot '\WakieWakie'
+$PathLIO = $PSCmdlet.MyInvocation.MyCommand.Source.LastIndexOf("\")
+$ScriptPath = $PSCmdlet.MyInvocation.MyCommand.Source.Substring(0,$PathLIO)
+$syncHash.ScriptModule = "$ScriptPath\wakiecommon.ps1"
+$synchash.StopwatchTimeElapsed = [timespan]::Zero
+$syncHash.CountdownIterations = 0
 
-$wpf = Get-ChildItem -Path $path -Filter *.xaml -file | Where-Object { $_.Name -ne 'App.xaml' } | Get-XamlObject
+Write-Debug "stop"
+$InitialSessionState = [System.Management.Automation.Runspaces.InitialSessionState]::CreateDefault()
+$Runspace = [runspacefactory]::CreateRunspace($InitialSessionState)
+$Runspace.ThreadOptions = "ReuseThread"
+$Runspace.ApartmentState = "STA"
+$Runspace.Name = "WakieWakie"
 
-#endregion
+$PowerShell = [powershell]::Create()
+$PowerShell.Runspace = $Runspace
 
-$wpf.frame.NavigationService.Navigate($wpf.ConfigPage) | Out-Null
+$Runspace.Open()
+$Runspace.SessionStateProxy.SetVariable("syncHash",$syncHash)
 
-$StopWatch = New-object System.Diagnostics.StopWatch
 
-$wpf.rbtnNumlock.add_Click({
-	$Key = "NUMLOCK"
-})
+[void]$PowerShell.AddScript({
+    . $syncHash.ScriptModule
+    $wpf = Get-ChildItem -Path $syncHash.XAMLPath -Filter *.xaml -File | Where-Object {$_.Name -ne "App.xaml"} | Get-XamlObject
+    $wpf.GetEnumerator() | % {$script:syncHash.Add($_.Name,$_.Value)}
 
-$wpf.rbtnCapsLock.add_Click({
-	$Key = "CAPSLOCK"
-})
+    $updateblock = {
+        $CLStatus = [System.Console]::CapsLock
+        $NLStatus = [System.Console]::NumberLock
+        If ($CLStatus) {$syncHash.CLStatusIndicator.Background = "#FF0CD3FF"}
+        Else {$syncHash.CLStatusIndicator.Background = "#FFD1D1D1"}
 
-$wpf.btnStart.add_Click({
-	Write-Host ("StopWatch running: {0}" -f $StopWatch.IsRunning)
-    $StopWatch.Start()
-    Write-Host ("StopWatch running: {0}" -f $StopWatch.IsRunning)
-    While ($StopWatch.isRunning -eq $true) {
-	    $Elapsed = ("{0}:{1}:{2}" -f $StopWatch.Elapsed.Minutes,$StopWatch.Elapsed.Seconds,$StopWatch.Elapsed.Milliseconds)
-	    $wpf.txtTimer.Text = $Elapsed
-	    If ($StopWatch.Elapsed.Seconds -gt 60) {$StopWatch.restart()}
+        If ($NLStatus) {$syncHash.NLStatusIndicator.Background = "#FF0CD3FF"}
+        Else {$syncHash.NLStatusIndicator.Background = "#FFD1D1D1"}
+
+        $synchash.ElapsedTime_lbl.Content = ("{0}:{1}:{2}.{3}" -f $syncHash.StopwatchTimeElapsed.Hours,$syncHash.StopwatchTimeElapsed.Minutes,$syncHash.StopwatchTimeElapsed.Seconds,$syncHash.StopwatchTimeElapsed.Milliseconds.ToString('D3'))
+        $synchash.LoopCounter_lbl.Content = $syncHash.CountdownIterations
     }
+
+    $timer = New-Object System.Windows.Threading.DispatcherTimer     
+	$timer.Interval = [TimeSpan]::FromMilliseconds(1)
+	$timer.Add_Tick($updateblock)
+	$timer.Start()
+	#if ($timer.IsEnabled) {$synchash.Host.ui.WriteVerboseLine('UI timer started')}
+    
+    #region Navigation buttons
+    [Void]$syncHash.MainWindowFrame.NavigationService.Navigate($syncHash.Config)
+
+    $syncHash.ConfigButtonNext.add_Click({
+        $syncHash.MainWindowFrame.NavigationService.Navigate($syncHash.CleanUp)
+    })
+
+    $syncHash.CleanUpButtonBack.add_Click({
+        $syncHash.MainWindowFrame.NavigationService.Navigate($syncHash.Config)
+    })
+    #endregion
+
+    $syncHash.DurationTextBox.Add_TextChanged({
+        $DurationCheck = Compare-Object -ReferenceObject $(1..30) -DifferenceObject ([int]$this.Text) -IncludeEqual -ExcludeDifferent
+        If ($DurationCheck) {
+            $synchash.DurationBorder.BorderBrush = "gray"
+            $SyncHash.StopwatchMax = [timespan]::FromDays(5)
+            $syncHash.TotalRuns = [Math]::Round($SyncHash.StopwatchMax.Ticks/([timespan]::FromMinutes($synchash.DurationTextBox.Text)).Ticks)
+            $syncHash.MaximumLoops_lbl.Content = ("{0:N0}" -f $syncHash.TotalRuns)
+            $synchash.btnStart.IsEnabled = $true
+        }
+        Else {
+            $synchash.DurationBorder.BorderBrush = "red"
+            $synchash.btnStart.IsEnabled = $false
+        }
+    })
+
+    $syncHash.NLRadioButton.add_Checked({
+        $syncHash.WakieKey = "NUMLOCK"
+        $syncHash.KeySelectionBorder.BorderThickness = 0
+    })
+
+    $syncHash.CLRadioButton.add_Checked({
+        $syncHash.WakieKey = "CAPSLOCK"
+        $syncHash.KeySelectionBorder.BorderThickness = 0
+    })
+
+    $syncHash.btnStart.add_Click({
+        If ($synchash.NLRadioButton.IsChecked -or $synchash.CLRadioButton.IsChecked) {
+            $CountdownRunspace = Get-Runspace -Name Countdown
+            If (($CountdownRunspace | Measure).Count -ge 1) {
+                $CountdownRunspace | % {
+                    $_.Close()
+                    sleep -Milliseconds 500
+                    $_.Dispose()
+                }
+            }
+            Update-CountdownTimer -syncHash $synchash -Duration $synchash.DurationTextBox.Text
+        }
+        Else {$syncHash.KeySelectionBorder.BorderThickness = 2}
+    })
+
+    $syncHash.btnStop.add_Click({
+        $CountdownRunspace = Get-Runspace -Name Countdown
+        If (($CountdownRunspace | Measure).Count -ge 1) {
+            $CountdownRunspace | % {
+                $_.Close()
+                sleep -Milliseconds 500
+                $_.Dispose()
+            }
+        }
+        $synchash.DurationTextBox.IsEnabled = $true
+        $synchash.btnStart.IsEnabled = $true
+    })
+
+    [Void]$syncHash.Window.ShowDialog()
+
 })
 
-$wpf.btnStop.add_Click({
-    Write-Host ("StopWatch running: {0}" -f $StopWatch.IsRunning)
-	$StopWatch.Stop()
-    Write-Host ("StopWatch running: {0}" -f $StopWatch.IsRunning)
-})
-
-
-
-$wpf.window.showdialog() | Out-Null
+$AsyncObject = $PowerShell.BeginInvoke()
