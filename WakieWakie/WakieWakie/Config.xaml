@@ -15,18 +15,7 @@
                 <GradientStop Color="#FFF1F1F1"/>
             </LinearGradientBrush>
         </Grid.Background>
-        <Button x:Name="ConfigButtonCancel" Content="Quit" HorizontalAlignment="Left" Margin="470,339,0,0" VerticalAlignment="Top" Width="120" IsCancel="True" Height="30" FontSize="16" TabIndex="3">
-            <Button.Effect>
-                <DropShadowEffect Opacity="0.65" BlurRadius="10" Color="#FF343434"/>
-            </Button.Effect>
-        </Button>
-        <Button x:Name="ConfigButtonNext" Content="Next" HorizontalAlignment="Right" Margin="0,0,160,25" VerticalAlignment="Bottom" Width="120" Height="40" FontSize="16" Visibility="Hidden">
-            <Button.Effect>
-                <DropShadowEffect Opacity="0.65" BlurRadius="10" Color="#FF343434"/>
-            </Button.Effect>
-        </Button>
-        <Button x:Name="btnStart" Content="Start" HorizontalAlignment="Left" Margin="145,118,0,0" VerticalAlignment="Top" Width="90" IsEnabled="False" TabIndex="1" Height="28" FontSize="16"/>
-        <Button x:Name="btnStop" Content="Stop" HorizontalAlignment="Left" Margin="245,118,0,0" VerticalAlignment="Top" Width="90" TabIndex="2" Height="28" FontSize="16" HorizontalContentAlignment="Center" Padding="2"/>
+        <Label x:Name="KeySelection_lbl" Content="Wakie Wakie Key Selection" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Top" Width="580" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="22" Height="44"/>
         <Border x:Name="KeySelectionBorder" BorderBrush="Red" BorderThickness="0" Height="25" Margin="0,50,0,0" HorizontalAlignment="Center" VerticalAlignment="Top" Width="225">
             <StackPanel HorizontalAlignment="Center" Orientation="Horizontal" VerticalAlignment="Center" Margin="0">
                 <RadioButton x:Name="NLRadioButton" Content="NUMLOCK" FontSize="14" FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,0,0,0"/>
@@ -34,10 +23,7 @@
                 <RadioButton x:Name="SLRadioButton" Content="SCROLLLOCK" FontSize="14" FontWeight="Bold" Margin="20,0,0,0" Visibility="Collapsed"/>
             </StackPanel>
         </Border>
-        <Border x:Name="DurationBorder" BorderBrush="Gray" BorderThickness="2" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,118,0,0" Width="123" Height="28">
-            <TextBox x:Name="DurationTextBox" BorderBrush="Black" HorizontalAlignment="Center" Height="25" Margin="0" TextWrapping="Wrap" VerticalAlignment="Center" Width="120" FontSize="16" VerticalContentAlignment="Center" ToolTip="Specify, in minutes, how often WakieWakie should keep the screen alive" TabIndex="0" BorderThickness="0"/>
-        </Border>
-        <TextBlock x:Name="TitletextBlock" HorizontalAlignment="Left" Margin="10,90,0,0" VerticalAlignment="Top" FontSize="18" Text="Wakie Wakie Time (in Minutes)"/>
+        <Separator HorizontalAlignment="Left" Height="6" Margin="10,79,0,0" VerticalAlignment="Top" Width="580"/>
         <StackPanel HorizontalAlignment="Left" Height="130" Margin="520,76,0,0" VerticalAlignment="Top" Width="60">
             <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,20,0,0">
                 <TextBlock x:Name="NLStatusIndicator" HorizontalAlignment="Left" Height="10" TextWrapping="Wrap" VerticalAlignment="Top" Width="40" Background="#FFD1D1D1" Margin="0"/>
@@ -54,16 +40,33 @@
             <TextBlock x:Name="CLStatusIndicator_txt" HorizontalAlignment="Right" TextWrapping="Wrap" Text="CAPS LOCK:" VerticalAlignment="Top" FontSize="22" FontFamily="Segoe UI Light" TextAlignment="Center" Padding="0" Margin="0,10,10,0" Height="30"/>
             <TextBlock x:Name="SLStatusIndicator_txt" HorizontalAlignment="Right" TextWrapping="Wrap" Text="SCROLL LOCK:" VerticalAlignment="Top" FontSize="22" FontFamily="Segoe UI Light" TextAlignment="Center" Padding="0" Margin="0,10,10,0" Height="30" Visibility="Collapsed"/>
         </StackPanel>
-        <Label x:Name="AppVersion_lbl" Content="WakieWakie v1.0" HorizontalAlignment="Left" Margin="10,343,0,0" VerticalAlignment="Top" FontFamily="Segoe UI Light" Foreground="#FF646464"/>
-        <Separator HorizontalAlignment="Left" Height="6" Margin="10,79,0,0" VerticalAlignment="Top" Width="580"/>
-        <Separator HorizontalAlignment="Left" Height="10" Margin="10,211,0,0" VerticalAlignment="Top" Width="580"/>
-        <Separator HorizontalAlignment="Left" Height="10" Margin="10,321,0,0" VerticalAlignment="Top" Width="580"/>
-        <Label x:Name="LoopCountTitle_lbl" Content="Max Number of Loops:" HorizontalAlignment="Left" Margin="10,162,0,0" VerticalAlignment="Top" FontSize="16" VerticalContentAlignment="Center" Width="210" HorizontalContentAlignment="Right"/>
-        <Label x:Name="MaximumLoops_lbl" Content="0" HorizontalAlignment="Left" Margin="225,159,0,0" VerticalAlignment="Top" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FontSize="18" FontFamily="Segoe UI Black" Width="85" ScrollViewer.VerticalScrollBarVisibility="Disabled"/>
-        <Border BorderBrush="Black" BorderThickness="2" HorizontalAlignment="Left" Height="90" Margin="480,226,0,0" VerticalAlignment="Top" Width="100" Background="White">
-            <Label x:Name="LoopCounter_lbl" Content="" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="34" FontWeight="Bold"/>
+        <TextBlock x:Name="TitletextBlock" HorizontalAlignment="Left" Margin="10,90,0,0" VerticalAlignment="Top" FontSize="18" Text="Wakie Wakie Time (in Minutes)"/>
+        <Border x:Name="DurationBorder" BorderBrush="Gray" BorderThickness="2" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,118,0,0" Width="123" Height="28">
+            <TextBox x:Name="DurationTextBox" BorderBrush="Black" HorizontalAlignment="Center" Height="25" Margin="0" TextWrapping="Wrap" VerticalAlignment="Center" Width="120" FontSize="16" VerticalContentAlignment="Center" ToolTip="Specify, in minutes, how often WakieWakie should keep the screen alive" TabIndex="0" BorderThickness="0"/>
         </Border>
+        <Button x:Name="btnStart" Content="Start" HorizontalAlignment="Left" Margin="145,118,0,0" VerticalAlignment="Top" Width="90" IsEnabled="False" TabIndex="1" Height="28" FontSize="16"/>
+        <Button x:Name="btnStop" Content="Stop" HorizontalAlignment="Left" Margin="245,118,0,0" VerticalAlignment="Top" Width="90" TabIndex="2" Height="28" FontSize="16" HorizontalContentAlignment="Center" Padding="2"/>
+        <Label x:Name="LoopCountTitle_lbl" Content="Max Number of Loops:" HorizontalAlignment="Left" Margin="10,162,0,0" VerticalAlignment="Top" FontSize="16" VerticalContentAlignment="Center" Width="210" HorizontalContentAlignment="Right"/>
+        <Label x:Name="MaximumLoops_lbl" Content="0" HorizontalAlignment="Left" Margin="225,159,0,0" VerticalAlignment="Top" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" FontSize="18" Width="85" ScrollViewer.VerticalScrollBarVisibility="Disabled" FontWeight="Bold"/>
+        <Separator HorizontalAlignment="Left" Height="10" Margin="10,211,0,0" VerticalAlignment="Top" Width="580"/>
         <Label x:Name="ElapsedTime_lbl" Content="" HorizontalAlignment="Left" Margin="10,226,0,0" VerticalAlignment="Top" RenderTransformOrigin="6.535,0.731" Width="465" Height="90" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontFamily="Segoe UI Light" FontSize="48"/>
-        <Label x:Name="KeySelection_lbl" Content="Wakie Wakie Key Selection" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Top" Width="580" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="22" Height="44"/>
+        <Border BorderBrush="Black" BorderThickness="2" HorizontalAlignment="Left" Height="90" Margin="480,226,0,0" VerticalAlignment="Top" Width="100" Background="White">
+            <StackPanel HorizontalAlignment="Left" Height="86" VerticalAlignment="Top" Width="96">
+                <Label x:Name="TitleLoopCounter_lbl" Content="Loop Counter" HorizontalAlignment="Left" VerticalAlignment="Top" Width="96" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="14" Padding="2" FontFamily="Segoe UI Light"/>
+                <Label x:Name="LoopCounter_lbl" Content="" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="34" FontWeight="Bold" Padding="0" Height="62"/>
+            </StackPanel>
+        </Border>
+        <Separator HorizontalAlignment="Left" Height="10" Margin="10,321,0,0" VerticalAlignment="Top" Width="580"/>
+        <Label x:Name="AppVersion_lbl" Content="WakieWakie v1.0" HorizontalAlignment="Left" Margin="10,343,0,0" VerticalAlignment="Top" FontFamily="Segoe UI Light" Foreground="#FF646464"/>
+        <Button x:Name="ConfigButtonQuit" Content="Quit" HorizontalAlignment="Left" Margin="470,339,0,0" VerticalAlignment="Top" Width="120" IsCancel="True" Height="30" FontSize="16" TabIndex="3">
+            <Button.Effect>
+                <DropShadowEffect Opacity="0.65" BlurRadius="10" Color="#FF343434"/>
+            </Button.Effect>
+        </Button>
+        <Button x:Name="ConfigButtonNext" Content="Next" HorizontalAlignment="Right" Margin="0,0,160,25" VerticalAlignment="Bottom" Width="120" Height="40" FontSize="16" Visibility="Hidden">
+            <Button.Effect>
+                <DropShadowEffect Opacity="0.65" BlurRadius="10" Color="#FF343434"/>
+            </Button.Effect>
+        </Button>    
     </Grid>
 </Page>
