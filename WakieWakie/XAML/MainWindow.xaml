@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WakieWakie"
         mc:Ignorable="d"
-        Title="WakieWakie" Height="425" Width="625" WindowStartupLocation="CenterScreen" MinWidth="625" MinHeight="425" SnapsToDevicePixels="True" ResizeMode="NoResize">
+        Title="WakieWakie" Height="425" Width="625" WindowStartupLocation="CenterScreen" MinWidth="625" MinHeight="425" SnapsToDevicePixels="True" ResizeMode="CanMinimize" State="Normal">
     <Grid>
         <Frame x:Name="MainWindowFrame" Content="" NavigationUIVisibility="Hidden"/>
     </Grid>
